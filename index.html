@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Каустики и фокусировка пучка</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Каустики и фокусировка в поле центральной силы</h1>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Панель параметров -->
+    <aside class="panel controls">
+      <h2>Параметры</h2>
+      <form id="params" autocomplete="off" onsubmit="return false">
+        <div class="field">
+          <label for="N">Число частиц N</label>
+          <div class="pair">
+            <input type="range" min="2" max="400" step="1" value="60" data-sync="N">
+            <input type="number" id="N" name="N" min="2" max="500" step="1" value="60">
+          </div>
+        </div>
+        <div class="field">
+          <label for="v0">Начальная скорость v₀</label>
+          <div class="pair">
+            <input type="range" min="0.2" max="6" step="0.1" value="2" data-sync="v0">
+            <input type="number" id="v0" name="v0" min="0.01" step="0.1" value="2">
+          </div>
+        </div>
+        <div class="field">
+          <label for="power">Показатель степени n</label>
+          <div class="pair">
+            <input type="range" min="1" max="4" step="0.1" value="2" data-sync="power">
+            <input type="number" id="power" name="power" min="0.5" max="5" step="0.1" value="2">
+          </div>
+        </div>
+        <div class="field">
+          <label for="K">Коэффициент силы K = k/m</label>
+          <div class="pair">
+            <input type="range" min="-3" max="10" step="0.1" value="1" data-sync="K">
+            <input type="number" id="K" name="K" step="0.1" value="1">
+          </div>
+          <small>K &gt; 0 — притяжение, K &lt; 0 — отталкивание</small>
+        </div>
+      </form>
+    </aside>
+  </main>
+</body>
+</html>
