@@ -5,50 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Каустики и фокусировка пучка</title>
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- KaTeX: отрисовка формул, записанных в TeX -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false }
+      ],
+      throwOnError: false
+    });"></script>
+  <style>
+    .katex-display { margin: 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>Каустики и фокусировка в поле центральной силы</h1>
+  <section class="hero">
+    <div class="viewport">
+      <canvas id="scene"></canvas>
+      <h1 class="hero-title">Каустики и фокусировка в поле центральной силы</h1>
+      <div class="hud" id="hud"></div>
+      <div class="zoom">
+        <button id="zoom-in" title="Приблизить">+</button>
+        <button id="zoom-out" title="Отдалить">−</button>
+        <button id="zoom-fit" title="Вписать">⤢</button>
+      </div>
+      <a class="scroll-hint" href="#analysis">Анализ ↓</a>
     </div>
-  </header>
 
-  <main class="layout">
-    <!-- Панель параметров -->
-    <aside class="panel controls">
-      <h2>Параметры</h2>
+    <!-- Параметры -->
+    <details class="overlay overlay-params" open>
+      <summary>Параметры</summary>
       <form id="params" autocomplete="off" onsubmit="return false">
         <div class="field">
-          <label for="N">Число частиц N</label>
+          <label for="N">Число частиц \(N\)</label>
           <div class="pair">
             <input type="range" min="2" max="400" step="1" value="60" data-sync="N">
             <input type="number" id="N" name="N" min="2" max="500" step="1" value="60">
           </div>
         </div>
         <div class="field">
-          <label for="v0">Начальная скорость v₀</label>
+          <label for="v0">Начальная скорость \(v_0\)</label>
           <div class="pair">
             <input type="range" min="0.2" max="6" step="0.1" value="2" data-sync="v0">
             <input type="number" id="v0" name="v0" min="0.01" step="0.1" value="2">
           </div>
         </div>
         <div class="field">
-          <label for="power">Показатель степени n</label>
+          <label for="power">Показатель степени \(n\)</label>
           <div class="pair">
             <input type="range" min="1" max="4" step="0.1" value="2" data-sync="power">
             <input type="number" id="power" name="power" min="0.5" max="5" step="0.1" value="2">
           </div>
         </div>
         <div class="field">
-          <label for="K">Коэффициент силы K = k/m</label>
+          <label for="K">Коэффициент силы \(K = k/m\)</label>
           <div class="pair">
             <input type="range" min="-3" max="10" step="0.1" value="1" data-sync="K">
             <input type="number" id="K" name="K" step="0.1" value="1">
           </div>
-          <small>K &gt; 0 — притяжение, K &lt; 0 — отталкивание</small>
+          <small>\(K &gt; 0\) — притяжение, \(K &lt; 0\) — отталкивание</small>
         </div>
+
+        <details class="more">
+          <summary>Геометрия пучка и точность</summary>
+          <div class="field inline">
+            <label><input type="checkbox" name="symmetric" checked> Симметричный пучок \((-b_{\max} \ldots +b_{\max})\)</label>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label for="bMin">\(b_{\min}\)</label><input type="number" id="bMin" name="bMin" step="0.1" value="0.2"></div>
+            <div class="field"><label for="bMax">\(b_{\max}\)</label><input type="number" id="bMax" name="bMax" step="0.1" value="3"></div>
+            <div class="field"><label for="L">Старт \(L\) \((x_0 = -L)\)</label><input type="number" id="L" name="L" step="1" value="10"></div>
+            <div class="field"><label for="xMax">Конец области \(x_{\max}\)</label><input type="number" id="xMax" name="xMax" step="1" value="20"></div>
+            <div class="field"><label for="rCapture">Радиус захвата</label><input type="number" id="rCapture" name="rCapture" step="0.01" value="0.05"></div>
+            <div class="field"><label for="eta">Точность шага \(\eta\)</label><input type="number" id="eta" name="eta" step="0.001" value="0.01"></div>
+          </div>
+          <small>Шаг: \(h = \eta \cdot \min\left(\dfrac{r}{v},\ \sqrt{\dfrac{r}{a}}\right)\). Меньше \(\eta\) — точнее и медленнее</small>
+        </details>
       </form>
-    </aside>
-  </main>
+    </details>
+
+    <!-- Слои -->
+    <details class="overlay overlay-layers" open>
+      <summary>Слои</summary>
+      <div class="layers">
+        <label><input type="checkbox" data-layer="traj" checked> Траектории</label>
+        <label><input type="checkbox" data-layer="particles" checked> Частицы</label>
+        <label><input type="checkbox" data-layer="heat"> Плотность траекторий</label>
+        <label><input type="checkbox" data-layer="focal" checked> <span class="dot red"></span>Фокальные точки</label>
+        <label><input type="checkbox" data-layer="caustic" checked> <span class="dot orange"></span><span>Каустика \((\det J = 0)\)</span></label>
+        <label><input type="checkbox" data-layer="theory" checked> <span class="dot green"></span><span>Теор. фокальная линия \((n = 2)\)</span></label>
+      </div>
+    </details>
+
+    <!-- Управление анимацией -->
+    <div class="overlay overlay-play">
+      <div class="buttons">
+        <button id="btn-start" class="primary">▶ Запуск</button>
+        <button id="btn-pause">⏸ Стоп</button>
+        <button id="btn-reset">↺ Перезапуск</button>
+      </div>
+      <label class="speed" for="speed">Скорость анимации
+        <input type="range" id="speed" min="1" max="30" value="5">
+      </label>
+    </div>
+  </section>
+
+  <script src="js/physics.js"></script>
+  <script src="js/theory.js"></script>
+  <script src="js/beam.js"></script>
+  <script src="js/caustic.js"></script>
 </body>
 </html>
