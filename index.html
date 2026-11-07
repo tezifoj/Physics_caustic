@@ -112,6 +112,139 @@
       </label>
     </div>
   </section>
+    <main class="analysis" id="analysis">
+  <div class="stats" id="stats"></div>
+
+  <!-- Вкладки анализа -->
+  <section class="panel tabs">
+    <nav class="tab-nav">
+      <button data-tab="angle" class="active">Угол отклонения</button>
+      <button data-tab="focus">Фокусировка и каустика</button>
+      <button data-tab="experiments">Серия экспериментов</button>
+      <button data-tab="accuracy">Проверка точности</button>
+      <button data-tab="theory">Теория</button>
+    </nav>
+
+    <!-- Угол отклонения -->
+    <div class="tab-panel active" id="tab-angle">
+      <div class="toolbar">
+        <label><span>\(b\) от</span> <input type="number" id="angle-bfrom" value="0.5" step="0.1"></label>
+        <label>до <input type="number" id="angle-bto" value="4" step="0.1"></label>
+        <label><span>\(b\) для таблицы</span> <input type="text" id="angle-blist" value="1, 2, 3, 4"></label>
+        <button id="angle-run" class="primary">Рассчитать</button>
+      </div>
+      <p class="note" id="angle-note"></p>
+      <div class="split">
+        <canvas class="chart" id="chart-angle"></canvas>
+        <div class="table-wrap" id="angle-table"></div>
+      </div>
+    </div>
+
+    <!-- Фокусировка -->
+    <div class="tab-panel" id="tab-focus">
+      <p class="note" id="focus-note"></p>
+      <div class="chart-grid">
+        <figure><figcaption>Фокальное расстояние \(x_f(b)\): где луч пересекает ось</figcaption><canvas class="chart" id="chart-focal"></canvas></figure>
+        <figure><figcaption>Плотность лучей у оси (1 = как в исходном пучке)</figcaption><canvas class="chart" id="chart-axis"></canvas></figure>
+        <figure><figcaption>Ширина пучка и мин. расстояние между соседними лучами \(/\,\Delta b\)</figcaption><canvas class="chart" id="chart-gap"></canvas></figure>
+        <figure><figcaption>Интенсивность фокусировки: сколько лучей сходится на единицу длины оси</figcaption><canvas class="chart" id="chart-hist"></canvas></figure>
+      </div>
+    </div>
+
+    <!-- Эксперименты -->
+    <div class="tab-panel" id="tab-experiments">
+      <div class="toolbar">
+        <label>Параметр
+          <select id="exp-param">
+            <option value="N">Число частиц N</option>
+            <option value="v0">Скорость v₀</option>
+            <option value="n" selected>Показатель n</option>
+            <option value="K">Коэффициент K</option>
+          </select>
+        </label>
+        <label>Значения <input type="text" id="exp-values" value="1.5, 2, 2.5, 3"></label>
+        <label><span>\(b\) для угла</span> <input type="number" id="exp-bref" value="1" step="0.1"></label>
+        <button id="exp-run" class="primary">Запустить серию</button>
+        <button id="exp-clear">Очистить</button>
+      </div>
+      <p class="note">Остальные параметры берутся с панели слева. Каждая серия добавляется в таблицу — так удобно сравнивать режимы.</p>
+      <div class="toolbar">
+        <label>На графике
+          <select id="exp-metric">
+            <option value="thetaNum">Угол θ (числ.), °</option>
+            <option value="focalXmin">Начало фокусировки x_min</option>
+            <option value="axisPeak">Макс. плотность у оси</option>
+            <option value="captured">Захвачено частиц</option>
+            <option value="envelopeCount">Точек каустики</option>
+          </select>
+        </label>
+        <span class="progress" id="exp-progress"></span>
+      </div>
+      <div class="split">
+        <canvas class="chart" id="chart-exp"></canvas>
+        <div class="table-wrap" id="exp-table"></div>
+      </div>
+    </div>
+
+    <!-- Точность -->
+    <div class="tab-panel" id="tab-accuracy">
+      <div class="toolbar">
+        <label><span>Значения \(\eta\)</span> <input type="text" id="acc-eta" value="0.2, 0.1, 0.05, 0.02, 0.01, 0.005"></label>
+        <label><span>\(b\)</span> <input type="number" id="acc-b" value="1" step="0.1"></label>
+        <label><span>Значения \(N\)</span> <input type="text" id="acc-n" value="20, 40, 80, 160, 320"></label>
+        <button id="acc-run" class="primary">Проверить</button>
+      </div>
+      <div class="split">
+        <canvas class="chart" id="chart-acc"></canvas>
+        <div>
+          <div class="table-wrap" id="acc-table"></div>
+          <div class="table-wrap" id="acc-table-n"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Теория -->
+    <div class="tab-panel" id="tab-theory">
+      <div class="theory">
+        <div>
+          <h3>Модель</h3>
+          <p>Частица массы \(m = 1\) движется в поле центральной силы</p>
+          <div class="formula">\[ F(r) = -\frac{K}{r^{n}}, \qquad K = \frac{k}{m}. \]</div>
+          <p>Уравнения движения:</p>
+          <div class="formula">\[ \ddot{x} = -\frac{K\,x}{r^{\,n+1}}, \qquad \ddot{y} = -\frac{K\,y}{r^{\,n+1}}, \qquad r = \sqrt{x^2 + y^2}. \]</div>
+          <p>Начальные условия: \(x(0) = -L\), \(y(0) = b\), \(v_x(0) = v_0\), \(v_y(0) = 0\).
+            Система четырёх уравнений первого порядка решается методом Рунге-Кутты 4-го порядка.</p>
+
+          <h3>Угол отклонения</h3>
+          <p>Закон обратных квадратов, \(n = 2\):</p>
+          <div class="formula">\[ \theta = 2\,\operatorname{arctg}\frac{K}{b\,v_0^2}. \]</div>
+          <p>Случай \(n = 3\):</p>
+          <div class="formula">\[ \theta = \pi\left(\frac{1}{\sqrt{1-\alpha}} - 1\right), \qquad \alpha = \frac{K}{v_0^2\,b^2}. \]</div>
+          <p>Произвольное \(n &gt; 1\):</p>
+          <div class="formula">\[ \theta = 2\int_0^{u_0} \frac{du}{\sqrt{1 - u^2 + \beta\,u^{\,n-1}}} - \pi, \qquad \beta = \frac{2K}{(n-1)\,v_0^2\,b^{\,n-1}}, \quad u = \frac{b}{r}, \]</div>
+          <p>где \(u_0\) — первый корень подкоренного выражения (точка поворота, \(r_{\min} = b/u_0\)).
+            Для притяжения под корнем стоит знак «\(+\)» (потенциальная энергия отрицательна), для отталкивания — «\(-\)».</p>
+          <p>Приближение малых углов:</p>
+          <div class="formula">\[ \theta \approx \frac{K\sqrt{\pi}\;\Gamma\!\left(\frac{n}{2}\right)}{v_0^2\,b^{n}\;\Gamma\!\left(\frac{n+1}{2}\right)}, \qquad n = 2:\ \ \theta \approx \frac{2K}{b\,v_0^2}. \]</div>
+        </div>
+        <div>
+          <h3>Каустика и фокусировка</h3>
+          <p>Каустика — огибающая семейства траекторий. Общее условие: якобиан отображения \((t, b) \mapsto (x, y)\) обращается в ноль:</p>
+          <div class="formula">\[ \det\frac{\partial(x, y)}{\partial(t, b)} = x_t\,y_b - y_t\,x_b = 0. \]</div>
+          <p>Если траектории можно записать как \(y = y(x;\, b)\), условие сводится к</p>
+          <div class="formula">\[ \left.\frac{\partial y}{\partial b}\right|_{x = \text{const}} = 0. \]</div>
+          <p>Для точечной массы \((n = 2)\) каустика вырождается в отрезок оси за центром — <b>фокальную линию</b>:
+            лучи с прицельными расстояниями \(b\) и \(-b\) пересекаются на оси в точке</p>
+          <div class="formula">\[ x_f = \frac{b^2\,v_0^2}{2K}. \]</div>
+          <p>Ближние к центру лучи фокусируются раньше, дальние — позже.
+            Каустику-огибающую в виде кривой хорошо видно при отталкивании \((K &lt; 0)\): это парабола, ограничивающая «тень».</p>
+          <h3>Текущий режим</h3>
+          <p id="theory-current"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+  </main>
 
   <script src="js/physics.js"></script>
   <script src="js/theory.js"></script>
