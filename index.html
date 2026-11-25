@@ -6,7 +6,6 @@
   <title>Каустики и фокусировка пучка</title>
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- KaTeX: отрисовка формул, записанных в TeX -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
@@ -82,7 +81,8 @@
             <div class="field"><label for="rCapture">Радиус захвата</label><input type="number" id="rCapture" name="rCapture" step="0.01" value="0.05"></div>
             <div class="field"><label for="eta">Точность шага \(\eta\)</label><input type="number" id="eta" name="eta" step="0.001" value="0.01"></div>
           </div>
-          <small>Шаг: \(h = \eta \cdot \min\left(\dfrac{r}{v},\ \sqrt{\dfrac{r}{a}}\right)\). Меньше \(\eta\) — точнее и медленнее</small>
+            <small>Шаг: \(h = \eta \cdot \min\left(\dfrac{r}{v},\ \sqrt{\dfrac{r}{a}}\right)\).</small>
+            <small>Меньше \(\eta\) — точнее и медленнее</small>
         </details>
       </form>
     </details>
@@ -96,7 +96,7 @@
         <label><input type="checkbox" data-layer="heat"> Плотность траекторий</label>
         <label><input type="checkbox" data-layer="focal" checked> <span class="dot red"></span>Фокальные точки</label>
         <label><input type="checkbox" data-layer="caustic" checked> <span class="dot orange"></span><span>Каустика \((\det J = 0)\)</span></label>
-        <label><input type="checkbox" data-layer="theory" checked> <span class="dot green"></span><span>Теор. фокальная линия \((n = 2)\)</span></label>
+        <label><input type="checkbox" data-layer="theory" checked> <span class="dot green"></span><span>Теоретическая фокальная линия</span></label>
       </div>
     </details>
 
@@ -250,5 +250,8 @@
   <script src="js/theory.js"></script>
   <script src="js/beam.js"></script>
   <script src="js/caustic.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/charts.js"></script>
 </body>
 </html>
